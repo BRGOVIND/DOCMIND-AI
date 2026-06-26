@@ -67,6 +67,7 @@ SUPABASE_STORAGE_BUCKET=documents
 
 ### 3. Run with Docker
 
+
 ```bash
 docker build -t docmind-ai .
 docker run -d --name docmind-ai-app --env-file .env -p 8000:8000 docmind-ai
