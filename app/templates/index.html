@@ -1,0 +1,1138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DocMind AI</title>
+  <style>
+    :root {
+      --ink: #212A31;
+      --deep: #2E3944;
+      --brand: #124E66;
+      --muted: #748D92;
+      --soft: #D3D9D4;
+      --panel: #f8faf8;
+      --paper: #ffffff;
+      --line: rgba(46, 57, 68, 0.18);
+      --danger: #b42318;
+      --shadow: 0 18px 45px rgba(33, 42, 49, 0.13);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--soft);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    textarea {
+      font: inherit;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 248px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      background: var(--ink);
+      color: #f4f7f4;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--brand), var(--muted));
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--soft);
+      font-size: 12px;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button,
+    .clear-button {
+      width: 100%;
+      border: 1px solid rgba(211, 217, 212, 0.18);
+      border-radius: 8px;
+      background: rgba(211, 217, 212, 0.06);
+      color: #f8faf8;
+      cursor: pointer;
+      padding: 11px 12px;
+      text-align: left;
+    }
+
+    .nav button.active,
+    .nav button:hover,
+    .clear-button:hover {
+      background: rgba(116, 141, 146, 0.26);
+      border-color: rgba(211, 217, 212, 0.35);
+    }
+
+    .workspace-card {
+      border: 1px solid rgba(211, 217, 212, 0.16);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(211, 217, 212, 0.07);
+    }
+
+    .workspace-card strong {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+
+    .workspace-card div {
+      color: #d3d9d4;
+      line-height: 1.7;
+      font-size: 13px;
+    }
+
+    .clear-button {
+      margin-top: auto;
+    }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      min-height: 74px;
+      padding: 18px 28px;
+      background: rgba(248, 250, 248, 0.84);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 23px;
+      letter-spacing: 0;
+    }
+
+    .topbar p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .auth-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 40px;
+    }
+
+    .auth-button,
+    .primary,
+    .ask-button {
+      border: 0;
+      border-radius: 8px;
+      background: var(--brand);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 800;
+      padding: 11px 16px;
+    }
+
+    .auth-button.secondary-auth {
+      background: var(--deep);
+    }
+
+    .content {
+      padding: 28px;
+      display: grid;
+      gap: 22px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: grid;
+      gap: 22px;
+    }
+
+    .hero {
+      min-height: 210px;
+      border-radius: 8px;
+      color: #fff;
+      padding: 28px;
+      background:
+        linear-gradient(135deg, rgba(33, 42, 49, 0.95), rgba(18, 78, 102, 0.86)),
+        radial-gradient(circle at 85% 20%, rgba(211, 217, 212, 0.38), transparent 32%);
+      display: grid;
+      align-content: end;
+      box-shadow: var(--shadow);
+    }
+
+    .hero h3 {
+      margin: 0;
+      max-width: 780px;
+      font-size: 34px;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      margin: 12px 0 0;
+      max-width: 780px;
+      color: #e8efea;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(320px, 430px) minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel,
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .metric {
+      padding: 18px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 28px;
+      color: var(--ink);
+    }
+
+    .panel-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .panel-header h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .panel-header span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+
+    .dropzone {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      min-height: 168px;
+      border: 1.5px dashed var(--muted);
+      border-radius: 8px;
+      background: #edf2ef;
+      color: var(--deep);
+      text-align: center;
+      cursor: pointer;
+      padding: 24px;
+    }
+
+    .dropzone:hover {
+      background: #e5ece8;
+      border-color: var(--brand);
+    }
+
+    .dropzone input {
+      display: none;
+    }
+
+    .dropzone strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 16px;
+    }
+
+    .dropzone span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .file-list,
+    .document-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .file-pill,
+    .document-row,
+    .source-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      padding: 12px;
+    }
+
+    .document-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .document-row strong,
+    .source-item strong {
+      display: block;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .document-row span,
+    .source-item p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .primary {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 16px;
+    }
+
+    .primary:disabled,
+    .ask-button:disabled,
+    .clear-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .question-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(18, 78, 102, 0.16);
+    }
+
+    .ask-button {
+      min-width: 116px;
+      align-self: end;
+      background: var(--ink);
+    }
+
+    .answer {
+      min-height: 250px;
+      color: #263244;
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    .answer h1,
+    .answer h2,
+    .answer h3 {
+      margin: 18px 0 10px;
+      color: var(--ink);
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .answer h1 {
+      font-size: 22px;
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 8px;
+    }
+
+    .answer h2 {
+      font-size: 19px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 6px;
+    }
+
+    .answer h3 {
+      font-size: 16px;
+    }
+
+    .answer p {
+      margin: 10px 0;
+    }
+
+    .answer ul,
+    .answer ol {
+      margin: 10px 0 14px 22px;
+      padding: 0;
+    }
+
+    .answer li {
+      margin: 6px 0;
+    }
+
+    .answer strong {
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .answer u {
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1.5px;
+    }
+
+    .answer table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .answer th,
+    .answer td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .answer th {
+      background: #e5ece8;
+      color: var(--ink);
+    }
+
+    .answer code {
+      background: #edf2ef;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1px 5px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+    }
+
+    .empty {
+      color: var(--muted);
+      white-space: pre-wrap;
+    }
+
+    .sources {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .toast {
+      min-height: 24px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toast.good {
+      color: var(--brand);
+    }
+
+    .toast.error {
+      color: var(--danger);
+    }
+
+    .note-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--deep);
+      line-height: 1.75;
+    }
+
+    @media (max-width: 1050px) {
+      .shell,
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        min-height: auto;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .topbar,
+      .question-row {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .content {
+        padding: 18px;
+      }
+
+      .hero h3 {
+        font-size: 27px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="mark">D</div>
+        <div>
+          <h1>DocMind AI</h1>
+          <p>Secure document intelligence</p>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Workspace navigation">
+        <button class="active" type="button" data-page="overview">Overview</button>
+        <button type="button" data-page="documents">Documents</button>
+        <button type="button" data-page="ask">Ask</button>
+        <button type="button" data-page="storage">Storage</button>
+      </nav>
+
+      <div class="workspace-card">
+        <strong>Workspace</strong>
+        <div id="statusText">No document indexed yet.</div>
+      </div>
+
+      <button id="clearButton" class="clear-button" type="button">Clear workspace</button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2 id="pageTitle">Overview</h2>
+          <p id="pageSubtitle">Upload, OCR, index, and query documents in one secured workspace.</p>
+        </div>
+        <div id="authArea" class="auth-area"></div>
+      </header>
+
+      <div class="content">
+        <section id="overview" class="page active">
+          <div class="hero">
+            <h3>Turn PDFs, scans, and notes into searchable answers.</h3>
+            <p>DocMind combines OCR, embeddings, vector retrieval, and Groq-powered answers while preparing the app for authenticated cloud storage.</p>
+          </div>
+
+          <div class="grid">
+            <div class="metric">
+              <span>Files</span>
+              <strong id="metricFiles">0</strong>
+            </div>
+            <div class="metric">
+              <span>Pages</span>
+              <strong id="metricPages">0</strong>
+            </div>
+            <div class="metric">
+              <span>Chunks</span>
+              <strong id="metricChunks">0</strong>
+            </div>
+          </div>
+        </section>
+
+        <section id="documents" class="page">
+          <div class="two-col">
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Upload documents</h3>
+                <span>PDF, PNG, JPG, WEBP</span>
+              </div>
+              <div class="panel-body">
+                <label class="dropzone" for="fileInput">
+                  <input id="fileInput" type="file" accept="application/pdf,image/png,image/jpeg,image/webp" multiple />
+                  <span>
+                    <strong>Select files</strong>
+                    Research papers, invoices, screenshots, scanned notes, or readable handwriting
+                  </span>
+                </label>
+                <div id="fileList" class="file-list"></div>
+                <button id="uploadButton" class="primary" type="button" disabled>Compress and index</button>
+                <div id="uploadToast" class="toast"></div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <h3>Indexed library</h3>
+                <span id="storageMode">Local mode</span>
+              </div>
+              <div class="panel-body">
+                <div id="documentList" class="document-list"></div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section id="ask" class="page">
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Ask DocMind</h3>
+              <span>Answers are grounded in retrieved chunks</span>
+            </div>
+            <div class="panel-body">
+              <div class="question-row">
+                <textarea id="question" placeholder="Ask about your uploaded documents..."></textarea>
+                <button id="askButton" class="ask-button" type="button">Ask</button>
+              </div>
+              <div id="answer" class="answer empty">Your answer will appear here after you upload a document and ask a question.</div>
+              <div id="sources" class="sources"></div>
+            </div>
+          </section>
+        </section>
+
+        <section id="storage" class="page">
+          <section class="panel">
+            <div class="panel-header">
+              <h3>Storage and privacy</h3>
+              <span>Production-ready direction</span>
+            </div>
+            <div class="panel-body">
+              <ul class="note-list">
+                <li>Without keys, DocMind runs in local demo mode and keeps uploaded files inside the Docker container.</li>
+                <li>With Clerk keys, requests are tied to signed-in users and user workspaces stay separated.</li>
+                <li>With Supabase keys, compressed files are uploaded to your configured storage bucket.</li>
+                <li>PDFs are optimized before storage; images are resized and converted to WEBP.</li>
+                <li>The clear workspace action removes the active local index and local uploaded files for the current user.</li>
+              </ul>
+            </div>
+          </section>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const pageTitle = document.getElementById("pageTitle");
+    const pageSubtitle = document.getElementById("pageSubtitle");
+    const authArea = document.getElementById("authArea");
+    const statusText = document.getElementById("statusText");
+    const metricFiles = document.getElementById("metricFiles");
+    const metricPages = document.getElementById("metricPages");
+    const metricChunks = document.getElementById("metricChunks");
+    const fileInput = document.getElementById("fileInput");
+    const fileList = document.getElementById("fileList");
+    const uploadButton = document.getElementById("uploadButton");
+    const uploadToast = document.getElementById("uploadToast");
+    const documentList = document.getElementById("documentList");
+    const storageMode = document.getElementById("storageMode");
+    const question = document.getElementById("question");
+    const askButton = document.getElementById("askButton");
+    const answer = document.getElementById("answer");
+    const sources = document.getElementById("sources");
+    const clearButton = document.getElementById("clearButton");
+
+    const pageCopy = {
+      overview: ["Overview", "Upload, OCR, index, and query documents in one secured workspace."],
+      documents: ["Documents", "Compress files, store them, and build a searchable vector index."],
+      ask: ["Ask", "Query your indexed workspace with cited source snippets."],
+      storage: ["Storage", "Understand how files, auth, and cloud storage are handled."],
+    };
+
+    let appConfig = {
+      clerk_publishable_key: "",
+      auth_enabled: false,
+      storage_mode: "local",
+    };
+
+    function setToast(element, message, kind = "") {
+      element.textContent = message;
+      element.className = `toast ${kind}`;
+    }
+
+    async function authHeaders() {
+      if (!window.Clerk || !window.Clerk.session) return {};
+      const token = await window.Clerk.session.getToken();
+      return token ? { Authorization: `Bearer ${token}` } : {};
+    }
+
+    async function apiFetch(url, options = {}) {
+      const headers = {
+        ...(options.headers || {}),
+        ...(await authHeaders()),
+      };
+      return fetch(url, { ...options, headers });
+    }
+
+    function waitForClerk(publishableKey) {
+
+      return new Promise((resolve, reject) => {
+        if (window.Clerk) {
+          resolve();
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.async = true;
+        script.crossOrigin = "anonymous";
+        script.setAttribute("data-clerk-publishable-key", publishableKey);
+script.src = "https://unpkg.com/@clerk/clerk-js@5/dist/clerk.browser.js";        script.addEventListener("error", () => reject(new Error("Clerk could not load.")));
+        document.head.appendChild(script);
+
+        let attempts = 0;
+        const timer = window.setInterval(() => {
+          attempts += 1;
+          if (window.Clerk) {
+            window.clearInterval(timer);
+            resolve();
+          }
+          if (attempts > 80) {
+            window.clearInterval(timer);
+            reject(new Error("Clerk could not load."));
+          }
+        }, 100);
+      });
+    }
+
+    function switchPage(pageId) {
+      document.querySelectorAll(".page").forEach((page) => {
+        page.classList.toggle("active", page.id === pageId);
+      });
+      document.querySelectorAll("[data-page]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.page === pageId);
+      });
+      pageTitle.textContent = pageCopy[pageId][0];
+      pageSubtitle.textContent = pageCopy[pageId][1];
+    }
+
+    async function setupAuth() {
+      const response = await fetch("/config");
+      appConfig = await response.json();
+      storageMode.textContent = `${appConfig.storage_mode} mode`;
+
+      if (!appConfig.clerk_publishable_key) {
+        authArea.textContent = "Demo mode";
+        return;
+      }
+
+      const pubKey = appConfig.clerk_publishable_key;
+        if (!pubKey) {
+          authArea.textContent = "Demo mode";
+          return;
+        }
+        await waitForClerk(pubKey);
+        await window.Clerk.load({ 
+  publishableKey: pubKey,
+  appearance: {},
+  signInUrl: '/sign-in',
+  signUpUrl: '/sign-up',
+  afterSignInUrl: '/',
+  afterSignUpUrl: '/',
+});
+
+      function renderAuth() {
+        authArea.innerHTML = "";
+        if (window.Clerk.user) {
+          window.Clerk.mountUserButton(authArea);
+          refreshStatus();
+          refreshDocuments();
+          return;
+        }
+
+        const signIn = document.createElement("button");
+        signIn.className = "auth-button secondary-auth";
+        signIn.type = "button";
+        signIn.textContent = "Sign in";
+        signIn.addEventListener("click", () => {
+                  window.Clerk.mountSignIn(document.getElementById("authArea"));
+                });
+
+        const signUp = document.createElement("button");
+        signUp.className = "auth-button";
+        signUp.type = "button";
+        signUp.textContent = "Sign up";
+        signUp.addEventListener("click", () => {
+                  window.Clerk.mountSignUp(document.getElementById("authArea"));
+                });
+
+        authArea.append(signIn, signUp);
+      }
+
+      window.Clerk.addListener(renderAuth);
+      renderAuth();
+    }
+
+    function renderFiles() {
+      fileList.innerHTML = "";
+      const files = Array.from(fileInput.files || []);
+      uploadButton.disabled = files.length === 0;
+
+      files.forEach((file) => {
+        const item = document.createElement("div");
+        item.className = "file-pill";
+        item.textContent = `${file.name} (${formatBytes(file.size)})`;
+        fileList.appendChild(item);
+      });
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes) return "0 B";
+      const units = ["B", "KB", "MB", "GB"];
+      const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+      return `${(bytes / Math.pow(1024, index)).toFixed(index ? 1 : 0)} ${units[index]}`;
+    }
+
+    async function refreshStatus() {
+      const response = await apiFetch("/status");
+      if (!response.ok) return;
+      const data = await response.json();
+
+      metricFiles.textContent = data.files.length;
+      metricPages.textContent = data.pages;
+      metricChunks.textContent = data.chunks;
+      storageMode.textContent = `${data.storage_mode} mode`;
+
+      if (!data.ready) {
+        statusText.textContent = "No document indexed yet.";
+        return;
+      }
+
+      statusText.innerHTML = `
+        ${data.files.length} file(s)<br>
+        ${data.pages} page(s)<br>
+        ${data.chunks} vector chunk(s)
+      `;
+    }
+
+    async function refreshDocuments() {
+      const response = await apiFetch("/documents");
+      if (!response.ok) return;
+      const items = await response.json();
+      documentList.innerHTML = "";
+
+      if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "No indexed documents yet.";
+        documentList.appendChild(empty);
+        return;
+      }
+
+      items.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "document-row";
+
+        const info = document.createElement("div");
+        const title = document.createElement("strong");
+        title.textContent = item.name;
+        const meta = document.createElement("span");
+        meta.textContent = `${item.pages} page(s) - ${item.chunks} chunk(s) - stored ${formatBytes(item.stored_size)}`;
+
+        const mode = document.createElement("span");
+        mode.textContent = appConfig.storage_mode === "supabase" ? "Supabase" : "Local";
+
+        info.append(title, meta);
+        row.append(info, mode);
+        documentList.appendChild(row);
+      });
+    }
+
+    async function uploadDocuments() {
+      const files = Array.from(fileInput.files || []);
+      if (!files.length) return;
+
+      const formData = new FormData();
+      files.forEach((file) => formData.append("files", file));
+
+      uploadButton.disabled = true;
+      setToast(uploadToast, "Compressing, OCR scanning, and indexing...");
+
+      try {
+        const response = await apiFetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || "Upload failed.");
+        }
+
+        setToast(uploadToast, `Indexed ${data.files.length} file(s), ${data.pages} page(s), ${data.chunks} chunk(s).`, "good");
+        await refreshStatus();
+        await refreshDocuments();
+        switchPage("ask");
+      } catch (error) {
+        setToast(uploadToast, error.message, "error");
+      } finally {
+        uploadButton.disabled = false;
+      }
+    }
+
+    function renderSources(items) {
+      sources.innerHTML = "";
+      items.forEach((item) => {
+        const source = document.createElement("div");
+        source.className = "source-item";
+
+        const title = document.createElement("strong");
+        title.textContent = item.page ? `${item.document} - page ${item.page}` : item.document;
+
+        const preview = document.createElement("p");
+        preview.textContent = item.preview;
+
+        source.append(title, preview);
+        sources.appendChild(source);
+      });
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatInline(value) {
+      let text = escapeHtml(value);
+      text = text.replace(/`([^`]+)`/g, "<code>$1</code>");
+      text = text.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      text = text.replace(/__([^_]+)__/g, "<u>$1</u>");
+      text = text.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+      return text;
+    }
+
+    function isTableDivider(line) {
+      return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+    }
+
+    function renderTable(lines) {
+      const rows = lines
+        .filter((line) => !isTableDivider(line))
+        .map((line) => line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|"));
+      if (!rows.length) return "";
+
+      const header = rows[0];
+      const body = rows.slice(1);
+      const headHtml = header.map((cell) => `<th>${formatInline(cell.trim())}</th>`).join("");
+      const bodyHtml = body.map((row) => `<tr>${row.map((cell) => `<td>${formatInline(cell.trim())}</td>`).join("")}</tr>`).join("");
+      return `<table><thead><tr>${headHtml}</tr></thead><tbody>${bodyHtml}</tbody></table>`;
+    }
+
+    function renderMarkdown(markdown) {
+      const normalized = markdown.replace(/\r\n/g, "\n").replace(/<br\s*\/?>/gi, "\n");
+      const lines = normalized.split("\n");
+      const html = [];
+      let paragraph = [];
+      let list = [];
+
+      function flushParagraph() {
+        if (!paragraph.length) return;
+        html.push(`<p>${formatInline(paragraph.join(" "))}</p>`);
+        paragraph = [];
+      }
+
+      function flushList() {
+        if (!list.length) return;
+        html.push(`<ul>${list.map((item) => `<li>${formatInline(item)}</li>`).join("")}</ul>`);
+        list = [];
+      }
+
+      for (let index = 0; index < lines.length; index += 1) {
+        const trimmed = lines[index].trim();
+        if (!trimmed) {
+          flushParagraph();
+          flushList();
+          continue;
+        }
+
+        if (trimmed.includes("|") && lines[index + 1] && isTableDivider(lines[index + 1])) {
+          flushParagraph();
+          flushList();
+          const tableLines = [trimmed, lines[index + 1]];
+          index += 2;
+          while (index < lines.length && lines[index].trim().includes("|")) {
+            tableLines.push(lines[index].trim());
+            index += 1;
+          }
+          index -= 1;
+          html.push(renderTable(tableLines));
+          continue;
+        }
+
+        const heading = trimmed.match(/^(#{1,3})\s+(.+)$/);
+        if (heading) {
+          flushParagraph();
+          flushList();
+          const level = heading[1].length;
+          html.push(`<h${level}>${formatInline(heading[2])}</h${level}>`);
+          continue;
+        }
+
+        const bullet = trimmed.match(/^[-*]\s+(.+)$/);
+        if (bullet) {
+          flushParagraph();
+          list.push(bullet[1]);
+          continue;
+        }
+
+        flushList();
+        paragraph.push(trimmed);
+      }
+
+      flushParagraph();
+      flushList();
+      return html.join("");
+    }
+
+    async function askQuestion() {
+      const text = question.value.trim();
+      if (!text) {
+        answer.textContent = "Type a question first.";
+        answer.className = "answer empty";
+        return;
+      }
+
+      askButton.disabled = true;
+      answer.textContent = "Thinking...";
+      answer.className = "answer empty";
+      sources.innerHTML = "";
+
+      try {
+        const response = await apiFetch("/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: text }),
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || "Question failed.");
+        }
+
+        answer.innerHTML = renderMarkdown(data.answer);
+        answer.className = "answer";
+        renderSources(data.sources || []);
+      } catch (error) {
+        answer.textContent = error.message;
+        answer.className = "answer empty";
+      } finally {
+        askButton.disabled = false;
+      }
+    }
+
+    async function clearWorkspace() {
+      clearButton.disabled = true;
+      try {
+        const response = await apiFetch("/clear", { method: "DELETE" });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Clear failed.");
+
+        fileInput.value = "";
+        renderFiles();
+        documentList.innerHTML = "";
+        answer.textContent = "Your answer will appear here after you upload a document and ask a question.";
+        answer.className = "answer empty";
+        sources.innerHTML = "";
+        setToast(uploadToast, data.message, "good");
+        await refreshStatus();
+        await refreshDocuments();
+      } catch (error) {
+        setToast(uploadToast, error.message, "error");
+      } finally {
+        clearButton.disabled = false;
+      }
+    }
+
+    document.querySelectorAll("[data-page]").forEach((button) => {
+      button.addEventListener("click", () => switchPage(button.dataset.page));
+    });
+    fileInput.addEventListener("change", renderFiles);
+    uploadButton.addEventListener("click", uploadDocuments);
+    askButton.addEventListener("click", askQuestion);
+    clearButton.addEventListener("click", clearWorkspace);
+    question.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) askQuestion();
+    });
+
+    setupAuth().then(() => {
+      refreshStatus();
+      refreshDocuments();
+    });
+  </script>
+</body>
+</html>
